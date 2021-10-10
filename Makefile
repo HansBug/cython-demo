@@ -2,9 +2,11 @@
 
 PYTHON := $(shell which python)
 
-DOC_DIR  := ./docs
-TEST_DIR := ./test
-SRC_DIR  := ./cythondemo
+DOC_DIR        := ./docs
+DIST_DIR       := ./dist
+WHEELHOUSE_DIR := ./wheelhouse
+TEST_DIR       := ./test
+SRC_DIR        := ./cythondemo
 
 RANGE_DIR      ?= .
 RANGE_TEST_DIR := ${TEST_DIR}/${RANGE_DIR}
@@ -17,11 +19,20 @@ COV_TYPES ?= xml term-missing
 build:
 	$(PYTHON) setup.py build_ext --inplace
 
+package:
+	$(PYTHON) -m build --sdist --wheel --outdir ${DIST_DIR}
+	for whl in `ls ${DIST_DIR}/*.whl`; do \
+  		auditwheel repair $$whl -w ${WHEELHOUSE_DIR} && \
+		cp `ls ${WHEELHOUSE_DIR}/*.whl` $$whl && \
+		rm -rf ${WHEELHOUSE_DIR}/* \
+  	; done
+
 clean:
 	rm -rf $(shell find ${SRC_DIR} -name '*.so') \
 			$(shell ls $(addsuffix .c, $(basename ${CYTHON_FILES})) \
 					  $(addsuffix .cpp, $(basename ${CYTHON_FILES})) \
 				2> /dev/null)
+	rm -rf ${DIST_DIR} ${WHEELHOUSE_DIR}
 
 test: unittest benchmark
 
@@ -43,4 +54,3 @@ docs:
 	$(MAKE) -C "${DOC_DIR}" build
 pdocs:
 	$(MAKE) -C "${DOC_DIR}" prod
-
