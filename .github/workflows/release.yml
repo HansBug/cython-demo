@@ -8,7 +8,7 @@ jobs:
   release:
     name: Publish to official pypi
     runs-on: ${{ matrix.os }}
-    if: ${{ github.repository == 'opendilab/treevalue' }}
+    if: ${{ github.repository == 'hansbug/cython-demo' }}
     strategy:
       matrix:
         os:

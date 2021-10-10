@@ -46,7 +46,7 @@ jobs:
           pip --version
           pip list
           tree .
-          cloc treevalue
+          cloc cythondemo
           cloc test
       - name: Run unittest
         env:
