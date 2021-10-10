@@ -23,8 +23,8 @@ package:
 	$(PYTHON) -m build --sdist --wheel --outdir ${DIST_DIR}
 	for whl in `ls ${DIST_DIR}/*.whl`; do \
   		auditwheel repair $$whl -w ${WHEELHOUSE_DIR} && \
-		cp `ls ${WHEELHOUSE_DIR}/*.whl` $$whl && \
-		rm -rf ${WHEELHOUSE_DIR}/* \
+		cp `ls ${WHEELHOUSE_DIR}/*.whl` ${DIST_DIR} && \
+		rm -rf $$whl ${WHEELHOUSE_DIR}/* \
   	; done
 
 clean:
