@@ -860,6 +860,7 @@ pip-selfcheck.json
 */*/*/bd/*/ip/*/*.xml
 
 *.c
+*.cpp
 *.h
 *.vho
 */*/bd/*/ip/*/*.tcl

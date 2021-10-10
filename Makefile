@@ -10,8 +10,7 @@ RANGE_DIR      ?= .
 RANGE_TEST_DIR := ${TEST_DIR}/${RANGE_DIR}
 RANGE_SRC_DIR  := ${SRC_DIR}/${RANGE_DIR}
 
-PYX_FILES    := $(shell find ${SRC_DIR} -name '*.pyx')
-CYTHON_FILES := ${PYX_FILES}
+CYTHON_FILES := $(shell find ${SRC_DIR} -name '*.pyx')
 
 COV_TYPES ?= xml term-missing
 
@@ -20,10 +19,11 @@ build:
 
 clean:
 	rm -rf $(shell find ${SRC_DIR} -name '*.so') \
-			$(addsuffix .c, $(basename ${CYTHON_FILES})) \
-			$(addsuffix .cpp, $(basename ${CYTHON_FILES}))
+			$(shell ls $(addsuffix .c, $(basename ${CYTHON_FILES})) \
+					  $(addsuffix .cpp, $(basename ${CYTHON_FILES})) \
+				2> /dev/null)
 
-test: unittest
+test: unittest benchmark
 
 unittest:
 	pytest "${RANGE_TEST_DIR}" \
