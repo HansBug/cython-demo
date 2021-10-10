@@ -39,6 +39,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade flake8 setuptools wheel twine
           pip install -r requirements.txt
+          pip install -r requirements-build.txt
           pip install -r requirements-test.txt
       - name: Test the basic environment
         run: |
@@ -48,11 +49,19 @@ jobs:
           tree .
           cloc cythondemo
           cloc test
+      - name: Build cython
+        run: |
+          make build
       - name: Run unittest
         env:
           CI: 'true'
         run: |
           make unittest
+      - name: Run benckmark
+        env:
+          CI: 'true'
+        run: |
+          make benchmark
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:

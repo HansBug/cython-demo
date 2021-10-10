@@ -1,4 +1,6 @@
-.PHONY: docs test unittest
+.PHONY: docs test unittest build clean
+
+PYTHON := $(shell which python)
 
 DOC_DIR  := ./docs
 TEST_DIR := ./test
@@ -8,7 +10,18 @@ RANGE_DIR      ?= .
 RANGE_TEST_DIR := ${TEST_DIR}/${RANGE_DIR}
 RANGE_SRC_DIR  := ${SRC_DIR}/${RANGE_DIR}
 
+PYX_FILES    := $(shell find ${SRC_DIR} -name '*.pyx')
+CYTHON_FILES := ${PYX_FILES}
+
 COV_TYPES ?= xml term-missing
+
+build:
+	$(PYTHON) setup.py build_ext --inplace
+
+clean:
+	rm -rf $(shell find ${SRC_DIR} -name '*.so') \
+			$(addsuffix .c, $(basename ${CYTHON_FILES})) \
+			$(addsuffix .cpp, $(basename ${CYTHON_FILES}))
 
 test: unittest
 
@@ -20,7 +33,14 @@ unittest:
 		$(if ${MIN_COVERAGE},--cov-fail-under=${MIN_COVERAGE},) \
 		$(if ${WORKERS},-n ${WORKERS},)
 
+benchmark:
+	pytest "${RANGE_TEST_DIR}" \
+		-sv -m benchmark \
+		--durations=0 \
+		$(if ${WORKERS},-n ${WORKERS},)
+
 docs:
 	$(MAKE) -C "${DOC_DIR}" build
 pdocs:
 	$(MAKE) -C "${DOC_DIR}" prod
+
