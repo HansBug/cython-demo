@@ -72,9 +72,8 @@ jobs:
           fail_ci_if_error: false
 
   try_release:
-    name: Publish to official pypi
+    name: Try build the release
     runs-on: ${{ matrix.os }}
-    if: ${{ github.repository == 'hansbug/cython-demo' }}
     strategy:
       matrix:
         os:
