@@ -14,7 +14,8 @@ RANGE_SRC_DIR  := ${SRC_DIR}/${RANGE_DIR}
 
 CYTHON_FILES := $(shell find ${SRC_DIR} -name '*.pyx')
 
-COV_TYPES ?= xml term-missing
+COV_TYPES        ?= xml term-missing
+COMPILE_PLATFORM ?= manylinux_2_24_x86_64
 
 build:
 	$(PYTHON) setup.py build_ext --inplace
@@ -22,7 +23,7 @@ build:
 package:
 	$(PYTHON) -m build --sdist --wheel --outdir ${DIST_DIR}
 	for whl in `ls ${DIST_DIR}/*.whl`; do \
-  		auditwheel repair $$whl -w ${WHEELHOUSE_DIR} && \
+		auditwheel repair $$whl -w ${WHEELHOUSE_DIR} --plat ${COMPILE_PLATFORM} && \
 		cp `ls ${WHEELHOUSE_DIR}/*.whl` ${DIST_DIR} && \
 		rm -rf $$whl ${WHEELHOUSE_DIR}/* \
   	; done
