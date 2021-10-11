@@ -73,5 +73,4 @@ cdef class _CTree:
         return len(self.map)
 
     cpdef public boolean empty(self, ):
-        cdef boolean not_empty = not self.map
-        return not not_empty
+        return not self.map
