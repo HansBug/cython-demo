@@ -4,6 +4,7 @@ from codecs import open
 from distutils.core import setup
 
 from setuptools import find_packages
+from Cython.Build import cythonize  # this line should be after 'from setuptools import find_packages'
 
 _package_name = "cythondemo"
 
@@ -39,8 +40,6 @@ def find_pyx(path='.'):
     return pyx_files
 
 
-from Cython.Build import cythonize  # this line should be after 'from setuptools import find_packages'
-
 setup(
     # information
     name=meta['__TITLE__'],
@@ -59,7 +58,7 @@ setup(
 
     # environment
     python_requires=">=3.6",
-    ext_modules=cythonize(find_pyx(), language='c++', language_level=3),
+    ext_modules=cythonize(find_pyx(), language_level=3),
     install_requires=requirements,
     tests_require=group_requirements['test'],
     extras_require=group_requirements,
