@@ -42,7 +42,7 @@ cdef class _CTree:
         if key not in self.map.keys():
             raise KeyError(f"Key {repr(key)} not found in this tree.")
 
-    cdef inline void _key_check(self, const char*key) except *:
+    cdef inline void _key_validate(self, const char*key) except *:
         cdef int n = strlen(key)
         if n < 1:
             raise KeyError(f'Key {repr(key)} is too short, minimum length is 1 but {n} found.')
@@ -55,7 +55,7 @@ cdef class _CTree:
                 raise KeyError(f'Invalid char {repr(key[i])} detected in key {repr(key)}.')
 
     cpdef public void set(self, str key, object value) except *:
-        self._key_check(key.encode())
+        self._key_validate(key.encode())
         self.map[key] = value
 
     cpdef public object get(self, str key):
