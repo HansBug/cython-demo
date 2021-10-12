@@ -8,6 +8,8 @@ jobs:
   unittest:
     name: Code test
     runs-on: ${{ matrix.os }}
+    env:
+      LINETRACE: 1
     strategy:
       matrix:
         os:

@@ -40,6 +40,8 @@ def find_pyx(path='.'):
     return pyx_files
 
 
+_LINETRACE = not not os.environ.get('LINETRACE', None)
+
 setup(
     # information
     name=meta['__TITLE__'],
@@ -58,7 +60,13 @@ setup(
 
     # environment
     python_requires=">=3.6",
-    ext_modules=cythonize(find_pyx(), language_level=3),
+    ext_modules=cythonize(
+        find_pyx(),
+        language_level=3,
+        compiler_directives=dict(
+            linetrace=_LINETRACE,
+        )
+    ),
     install_requires=requirements,
     tests_require=group_requirements['test'],
     extras_require=group_requirements,

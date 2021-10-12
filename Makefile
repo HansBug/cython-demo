@@ -18,7 +18,8 @@ COV_TYPES        ?= xml term-missing
 COMPILE_PLATFORM ?= manylinux_2_24_x86_64
 
 build:
-	$(PYTHON) setup.py build_ext --inplace
+	$(PYTHON) setup.py build_ext --inplace \
+					$(if ${LINETRACE},--define CYTHON_TRACE,)
 
 package:
 	$(PYTHON) -m build --sdist --wheel --outdir ${DIST_DIR}
