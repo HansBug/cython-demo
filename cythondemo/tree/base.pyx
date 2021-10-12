@@ -32,22 +32,22 @@ cpdef inline object _keep_object(object obj):
 
 cdef class BaseTree:
     cpdef public void set(self, str key, object value) except *:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     cpdef public object get(self, str key):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     cpdef public void del_(self, str key) except *:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     cpdef public boolean contains(self, str key) except *:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     cpdef public uint size(self, ) except *:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     cpdef public boolean empty(self, ) except *:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     cpdef public dict dump(self):
         return self.deepdumpx(_keep_object)
@@ -56,7 +56,7 @@ cdef class BaseTree:
         return self.deepcopyx(deepcopy)
 
     cpdef public dict deepdumpx(self, copy_func):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     cpdef public BaseTree copy(self):
         return self.deepcopyx(_keep_object)
@@ -69,7 +69,7 @@ cdef class BaseTree:
         return cls(self.deepdumpx(copy_func))
 
     def __getstate__(self):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def __setstate__(self, state):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
