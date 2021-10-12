@@ -2,39 +2,16 @@
 # cython:language_level=3
 
 from libc.string cimport strlen
+from .base cimport unraw, BaseTree
 
-ctypedef unsigned char boolean
-ctypedef unsigned int uint
-
-cdef class _RawWrapper:
-    cdef public object value
-
-    def __cinit__(self, v):
-        self.value = v
-
-cpdef public inline object raw(object obj):
-    if not isinstance(obj, _RawWrapper) and isinstance(obj, dict):
-        return _RawWrapper(obj)
-    else:
-        return obj
-
-cpdef public inline object unraw(object obj):
-    if isinstance(obj, _RawWrapper):
-        return obj.value
-    else:
-        return obj
-
-cdef class _CTree:
-    # cdef unordered_map[const char*, _CTreeNode*] map
-    cdef dict map
-
+cdef class Tree(BaseTree):
     def __cinit__(self, dict value):
         self.map = {}
         cdef str k
         cdef object v
         for k, v in value.items():
             if isinstance(v, dict):
-                self.map[k] = _CTree(v)
+                self.map[k] = Tree(v)
             else:
                 self.map[k] = unraw(v)
 
