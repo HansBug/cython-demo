@@ -2,7 +2,8 @@
 # cython:language_level=3
 
 from libc.string cimport strlen
-from .base cimport unraw, BaseTree
+
+from .base cimport raw, unraw, BaseTree
 
 cdef class Tree(BaseTree):
     def __cinit__(self, dict value):
@@ -14,6 +15,9 @@ cdef class Tree(BaseTree):
                 self.map[k] = Tree(v)
             else:
                 self.map[k] = unraw(v)
+
+    def __getnewargs_ex__(self):  # for __cinit__, when pickle.loads
+        return ({}, ), {}
 
     cdef inline void _check_key_exist(self, str key) except *:
         if key not in self.map.keys():
@@ -51,3 +55,21 @@ cdef class Tree(BaseTree):
 
     cpdef public boolean empty(self, ):
         return not self.map
+
+    cpdef public dict deepdumpx(self, copy_func):
+        cdef dict result = {}
+        cdef str k
+        cdef object v
+        for k, v in self.map.items():
+            if isinstance(v, BaseTree):
+                result[k] = v.dump()
+            else:
+                result[k] = raw(copy_func(v))
+
+        return result
+
+    def __getstate__(self):
+        return self.map
+
+    def __setstate__(self, state):
+        self.map = state

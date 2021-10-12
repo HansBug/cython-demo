@@ -14,3 +14,9 @@ cdef class BaseTree:
     cpdef public boolean contains(self, str key) except *
     cpdef public uint size(self, ) except *
     cpdef public boolean empty(self, ) except *
+    cpdef public dict deepdump(self)
+    cpdef public dict deepdumpx(self, copy_func)
+    cpdef public dict dump(self, )
+    cpdef public BaseTree deepcopy(self)
+    cpdef public BaseTree deepcopyx(self, copy_func)
+    cpdef public BaseTree copy(self, )
