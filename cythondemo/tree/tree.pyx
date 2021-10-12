@@ -11,17 +11,14 @@ cdef class Tree(BaseTree):
         cdef str k
         cdef object v
         for k, v in value.items():
+            self._key_validate(k.encode())
             if isinstance(v, dict):
                 self.map[k] = Tree(v)
             else:
                 self.map[k] = unraw(v)
 
     def __getnewargs_ex__(self):  # for __cinit__, when pickle.loads
-        return ({}, ), {}
-
-    cdef inline void _check_key_exist(self, str key) except *:
-        if key not in self.map.keys():
-            raise KeyError(f"Key {repr(key)} not found in this tree.")
+        return ({},), {}
 
     cdef inline void _key_validate(self, const char*key) except *:
         cdef int n = strlen(key)
@@ -40,15 +37,19 @@ cdef class Tree(BaseTree):
         self.map[key] = value
 
     cpdef public object get(self, str key):
-        self._check_key_exist(key)
-        return self.map[key]
+        try:
+            return self.map[key]
+        except KeyError:
+            raise KeyError(f"Key {repr(key)} not found in this tree.")
 
     cpdef public void del_(self, str key) except *:
-        self._check_key_exist(key)
-        del self.map[key]
+        try:
+            del self.map[key]
+        except KeyError:
+            raise KeyError(f"Key {repr(key)} not found in this tree.")
 
     cpdef public boolean contains(self, str key):
-        return key in self.map.keys()
+        return key in self.map
 
     cpdef public uint size(self, ):
         return len(self.map)
