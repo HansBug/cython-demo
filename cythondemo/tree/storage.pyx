@@ -83,12 +83,6 @@ cdef class TreeStorage:
         cdef type cls = type(self)
         return create_storage(self.deepdumpx(copy_func))
 
-    def __getstate__(self):
-        return self.map
-
-    def __setstate__(self, state):
-        self.map = state
-
     cpdef public dict detach(self):
         return self.map
 
@@ -120,6 +114,17 @@ cdef class TreeStorage:
                     self.map[k] = copy_func(v)
             else:
                 del self.map[k]
+
+    def __getstate__(self):
+        return self.map
+
+    def __setstate__(self, state):
+        self.map = state
+
+    def __repr__(self):
+        cdef tuple keys = tuple(sorted(self.map.keys()))
+        cdef str clsname = self.__class__.__name__
+        return f'<{clsname} at {hex(id(self))}, keys: {repr(keys)}>'
 
 def create_storage(dict value):
     cdef dict _map = {}

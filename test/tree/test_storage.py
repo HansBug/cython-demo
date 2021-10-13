@@ -220,3 +220,12 @@ class TestTreeStorage:
         assert t1.get('f').get('x') == 3
         assert t1.get('f').get('y') == 4
         assert t1.get('f') is not t.get('f')
+
+    def test_repr(self):
+        h1 = {'x': 3, 'y': 4}
+        h2 = {'x': 3, 'y': 4}
+        t = create_storage({'a': 1, 'b': 2, 'c': raw(h1), 'd': h2, 'f': h2})
+
+        assert repr(('a', 'b', 'c', 'd', 'f')) in repr(t)
+        assert repr(('x', 'y')) in repr(t.get('d'))
+        assert repr(('x', 'y')) in repr(t.get('f'))
