@@ -199,15 +199,24 @@ class TestTreeStorage:
         assert dt['d'].get('x') == 3
         assert dt['d'].get('y') == 4
 
-    def test_sync(self):
+    def test_copy_from(self):
         h1 = {'x': 3, 'y': 4}
         h2 = {'x': 3, 'y': 4}
-        t = create_storage({'a': 1, 'b': 2, 'c': raw(h1), 'd': h2})
+        t = create_storage({'a': 1, 'b': 2, 'c': raw(h1), 'd': h2, 'f': h2})
 
-        t1 = create_storage({})
-        t1.sync_from(t)
+        h3 = {'x': 33, 'y': 44}
+        h4 = {'x': 33, 'y': 44}
+        t1 = create_storage({'a': 11, 'e': 2333, 'c': raw(h3), 'd': h4})
+        did = id(t1.get('d'))
+        t1.copy_from(t)
+        assert t1 is not t
         assert t1.get('a') == 1
         assert t1.get('b') == 2
         assert t1.get('c') is h1
         assert t1.get('d').get('x') == 3
         assert t1.get('d').get('y') == 4
+        assert id(t1.get('d')) == did
+        assert not t1.contains('e')
+        assert t1.get('f').get('x') == 3
+        assert t1.get('f').get('y') == 4
+        assert t1.get('f') is not t.get('f')

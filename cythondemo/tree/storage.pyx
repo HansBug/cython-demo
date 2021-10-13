@@ -93,8 +93,33 @@ cdef class TreeStorage:
         return self.map
 
     # noinspection PyAttributeOutsideInit
-    cpdef public void sync_from(self, TreeStorage ts):
-        self.map = ts.detach()
+    cpdef public void copy_from(self, TreeStorage ts):
+        self.deepcopyx_from(ts, _keep_object)
+
+    cpdef public void deepcopy_from(self, TreeStorage ts):
+        self.deepcopyx_from(ts, deepcopy)
+
+    cpdef public void deepcopyx_from(self, TreeStorage ts, copy_func):
+        cdef dict detached = ts.detach()
+        cdef set keys = set(self.map.keys()) | set(detached.keys())
+
+        cdef str k
+        cdef object
+        cdef TreeStorage newv
+        for k in keys:
+            if k in detached:
+                v = detached[k]
+                if isinstance(v, TreeStorage):
+                    if k in self.map and isinstance(self.map[k], TreeStorage):
+                        self.map[k].copy_from(v)
+                    else:
+                        newv = TreeStorage({})
+                        newv.copy_from(v)
+                        self.map[k] = newv
+                else:
+                    self.map[k] = copy_func(v)
+            else:
+                del self.map[k]
 
 def create_storage(dict value):
     cdef dict _map = {}
