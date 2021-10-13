@@ -1,11 +1,16 @@
 # distutils:language=c++
 # cython:language_level=3
 
+from copy import deepcopy
+
 from libc.string cimport strlen
 
-from .base cimport raw, unraw, BaseTree
+from .base cimport raw, unraw
 
-cdef class Tree(BaseTree):
+cdef inline object _keep_object(object obj):
+    return obj
+
+cdef class TreeStorage:
     def __cinit__(self, dict value):
         self.map = {}
         cdef str k
@@ -13,7 +18,7 @@ cdef class Tree(BaseTree):
         for k, v in value.items():
             self._key_validate(k.encode())
             if isinstance(v, dict):
-                self.map[k] = Tree(v)
+                self.map[k] = TreeStorage(v)
             else:
                 self.map[k] = unraw(v)
 
@@ -29,8 +34,9 @@ cdef class Tree(BaseTree):
 
         cdef int i
         for i in range(n):
-            if not (b'a' <= key[i] <= b'z' or b'A' <= key[i] <= b'Z' or key[i] == b'_'):
-                raise KeyError(f'Invalid char {repr(key[i])} detected in key {repr(key)}.')
+            if not (b'a' <= key[i] <= b'z' or b'A' <= key[i] <= b'Z' or key[i] == b'_'
+                    or (i > 0 and b'0' <= key[i] <= b'9')):
+                raise KeyError(f'Invalid char {repr(key[i])} detected in position {repr(i)} of key {repr(key)}.')
 
     cpdef public void set(self, str key, object value) except *:
         self._key_validate(key.encode())
@@ -51,23 +57,39 @@ cdef class Tree(BaseTree):
     cpdef public boolean contains(self, str key):
         return key in self.map
 
-    cpdef public uint size(self, ):
+    cpdef public uint size(self):
         return len(self.map)
 
-    cpdef public boolean empty(self, ):
+    cpdef public boolean empty(self):
         return not self.map
+
+    cpdef public dict dump(self):
+        return self.deepdumpx(_keep_object)
+
+    cpdef public dict deepdump(self):
+        return self.deepdumpx(deepcopy)
 
     cpdef public dict deepdumpx(self, copy_func):
         cdef dict result = {}
         cdef str k
         cdef object v
         for k, v in self.map.items():
-            if isinstance(v, BaseTree):
+            if isinstance(v, TreeStorage):
                 result[k] = v.dump()
             else:
                 result[k] = raw(copy_func(v))
 
         return result
+
+    cpdef public TreeStorage copy(self):
+        return self.deepcopyx(_keep_object)
+
+    cpdef public TreeStorage deepcopy(self):
+        return self.deepcopyx(deepcopy)
+
+    cpdef public TreeStorage deepcopyx(self, copy_func):
+        cdef type cls = type(self)
+        return cls(self.deepdumpx(copy_func))
 
     def __getstate__(self):
         return self.map

@@ -1,2 +1,2 @@
-from .base import raw, unraw, BaseTree
-from .tree import Tree
+from .base import raw, unraw
+from .storage import TreeStorage
