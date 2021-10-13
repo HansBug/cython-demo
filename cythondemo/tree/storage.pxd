@@ -4,10 +4,11 @@
 ctypedef unsigned char boolean
 ctypedef unsigned int uint
 
+cdef void _key_validate(const char*key) except *
+
 cdef class TreeStorage:
     cdef dict map
 
-    cdef inline void _key_validate(self, const char*key) except *
     cpdef public void set(self, str key, object value) except *
     cpdef public object get(self, str key)
     cpdef public void del_(self, str key) except *
@@ -20,3 +21,5 @@ cdef class TreeStorage:
     cpdef public TreeStorage copy(self)
     cpdef public TreeStorage deepcopy(self)
     cpdef public TreeStorage deepcopyx(self, copy_func)
+    cpdef public dict detach(self)
+    cpdef public void sync_from(self, TreeStorage ts)

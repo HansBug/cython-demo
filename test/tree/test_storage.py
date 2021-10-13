@@ -1,16 +1,18 @@
+import pickle
+
 import pytest
 
-from cythondemo.tree import TreeStorage, raw
+from cythondemo.tree import create_storage, raw, TreeStorage
 
 
-# noinspection PyArgumentList
+# noinspection PyArgumentList,DuplicatedCode
 @pytest.mark.unittest
 class TestTreeStorage:
     def test_init(self):
-        _ = TreeStorage({'a': 1, 'b': 2, 'c': raw({'x': 3, 'y': 4}), 'd': {'x': 3, 'y': 4}})
+        _ = create_storage({'a': 1, 'b': 2, 'c': raw({'x': 3, 'y': 4}), 'd': {'x': 3, 'y': 4}})
 
     def test_get(self):
-        t = TreeStorage({'a': 1, 'b': 2, 'c': raw({'x': 3, 'y': 4}), 'd': {'x': 3, 'y': 4}})
+        t = create_storage({'a': 1, 'b': 2, 'c': raw({'x': 3, 'y': 4}), 'd': {'x': 3, 'y': 4}})
         assert t.get('a') == 1
         assert t.get('b') == 2
         assert t.get('c') == {'x': 3, 'y': 4}
@@ -22,11 +24,11 @@ class TestTreeStorage:
             _ = t.get('fff')
 
     def test_set(self):
-        t = TreeStorage({})
+        t = create_storage({})
         t.set('a', 1)
         t.set('b', 2)
         t.set('c', {'x': 3, 'y': 4})
-        t.set('d', TreeStorage({'x': 3, 'y': 4}))
+        t.set('d', create_storage({'x': 3, 'y': 4}))
         t.set('_0a', None)
 
         assert t.get('a') == 1
@@ -43,7 +45,7 @@ class TestTreeStorage:
             t.set('0' + 'a' * 10, 233)
 
     def test_del_(self):
-        t = TreeStorage({'a': 1, 'b': 2, 'c': raw({'x': 3, 'y': 4}), 'd': {'x': 3, 'y': 4}})
+        t = create_storage({'a': 1, 'b': 2, 'c': raw({'x': 3, 'y': 4}), 'd': {'x': 3, 'y': 4}})
         t.del_('c')
         t.del_('b')
 
@@ -58,7 +60,7 @@ class TestTreeStorage:
             t.del_('fff')
 
     def test_contains(self):
-        t = TreeStorage({'a': 1, 'b': 2, 'c': raw({'x': 3, 'y': 4}), 'd': {'x': 3, 'y': 4}})
+        t = create_storage({'a': 1, 'b': 2, 'c': raw({'x': 3, 'y': 4}), 'd': {'x': 3, 'y': 4}})
         assert t.contains('a')
         assert t.contains('b')
         assert t.contains('c')
@@ -67,7 +69,7 @@ class TestTreeStorage:
         assert not t.contains('kdfsj')
 
     def test_size(self):
-        t = TreeStorage({'a': 1, 'b': 2, 'c': raw({'x': 3, 'y': 4}), 'd': {'x': 3, 'y': 4}})
+        t = create_storage({'a': 1, 'b': 2, 'c': raw({'x': 3, 'y': 4}), 'd': {'x': 3, 'y': 4}})
         assert t.size() == 4
         assert t.get('d').size() == 2
 
@@ -80,7 +82,7 @@ class TestTreeStorage:
         assert t.size() == 2
 
     def test_empty(self):
-        t = TreeStorage({'a': 1, 'b': 2, 'c': raw({'x': 3, 'y': 4}), 'd': {'x': 3, 'y': 4}})
+        t = create_storage({'a': 1, 'b': 2, 'c': raw({'x': 3, 'y': 4}), 'd': {'x': 3, 'y': 4}})
         assert not t.empty()
         assert not t.get('d').empty()
 
@@ -96,3 +98,116 @@ class TestTreeStorage:
         t.del_('b')
         t.del_('d')
         assert t.empty()
+
+    def test_dump(self):
+        h1 = {'x': 3, 'y': 4}
+        h2 = {'x': 3, 'y': 4}
+        t = create_storage({'a': 1, 'b': 2, 'c': raw(h1), 'd': h2})
+
+        _dumped = t.dump()
+        assert _dumped['a'] == 1
+        assert _dumped['b'] == 2
+        assert _dumped['c'].value is h1
+        assert _dumped['d']['x'] == 3
+        assert _dumped['d']['y'] == 4
+
+    def test_deepdump(self):
+        h1 = {'x': 3, 'y': 4}
+        h2 = {'x': 3, 'y': 4}
+        t = create_storage({'a': 1, 'b': 2, 'c': raw(h1), 'd': h2})
+
+        _dumped = t.deepdump()
+        assert _dumped['a'] == 1
+        assert _dumped['b'] == 2
+        assert _dumped['c'].value == h1
+        assert _dumped['c'] is not h1
+        assert _dumped['d']['x'] == 3
+        assert _dumped['d']['y'] == 4
+
+    def test_deepdumpx(self):
+        h1 = {'x': 3, 'y': 4}
+        h2 = {'x': 3, 'y': 4}
+        t = create_storage({'a': 1, 'b': 2, 'c': raw(h1), 'd': h2})
+
+        _dumped = t.deepdumpx(lambda x: -x if isinstance(x, int) else {'holy': 'shit'})
+        assert _dumped['a'] == -1
+        assert _dumped['b'] == -2
+        assert _dumped['c'].value == {'holy': 'shit'}
+        assert _dumped['d']['x'] == -3
+        assert _dumped['d']['y'] == -4
+
+    def test_copy(self):
+        h1 = {'x': 3, 'y': 4}
+        h2 = {'x': 3, 'y': 4}
+        t = create_storage({'a': 1, 'b': 2, 'c': raw(h1), 'd': h2})
+
+        t1 = t.copy()
+        assert t1.get('a') == 1
+        assert t1.get('b') == 2
+        assert t1.get('c') is h1
+        assert t1.get('d').get('x') == 3
+        assert t1.get('d').get('y') == 4
+
+    def test_deepcopy(self):
+        h1 = {'x': 3, 'y': 4}
+        h2 = {'x': 3, 'y': 4}
+        t = create_storage({'a': 1, 'b': 2, 'c': raw(h1), 'd': h2})
+
+        t1 = t.deepcopy()
+        assert t1.get('a') == 1
+        assert t1.get('b') == 2
+        assert t1.get('c') == h1
+        assert t1.get('c') is not h1
+        assert t1.get('d').get('x') == 3
+        assert t1.get('d').get('y') == 4
+
+    def test_deepcopyx(self):
+        h1 = {'x': 3, 'y': 4}
+        h2 = {'x': 3, 'y': 4}
+        t = create_storage({'a': 1, 'b': 2, 'c': raw(h1), 'd': h2})
+
+        t1 = t.deepcopyx(lambda x: -x if isinstance(x, int) else {'holy': 'shit'})
+        assert t1.get('a') == -1
+        assert t1.get('b') == -2
+        assert t1.get('c') == {'holy': 'shit'}
+        assert t1.get('d').get('x') == -3
+        assert t1.get('d').get('y') == -4
+
+    def test_pickle(self):
+        h1 = {'x': 3, 'y': 4}
+        h2 = {'x': 3, 'y': 4}
+        t = create_storage({'a': 1, 'b': 2, 'c': raw(h1), 'd': h2})
+
+        t1 = pickle.loads(pickle.dumps(t))
+        assert t1.get('a') == 1
+        assert t1.get('b') == 2
+        assert t1.get('c') == h1
+        assert t1.get('c') is not h1
+        assert t1.get('d').get('x') == 3
+        assert t1.get('d').get('y') == 4
+
+    def test_detach(self):
+        h1 = {'x': 3, 'y': 4}
+        h2 = {'x': 3, 'y': 4}
+        t = create_storage({'a': 1, 'b': 2, 'c': raw(h1), 'd': h2})
+
+        dt = t.detach()
+        assert dt['a'] == 1
+        assert dt['b'] == 2
+        assert dt['c'] == h1
+        assert isinstance(dt['d'], TreeStorage)
+        assert dt['d'].get('x') == 3
+        assert dt['d'].get('y') == 4
+
+    def test_sync(self):
+        h1 = {'x': 3, 'y': 4}
+        h2 = {'x': 3, 'y': 4}
+        t = create_storage({'a': 1, 'b': 2, 'c': raw(h1), 'd': h2})
+
+        t1 = create_storage({})
+        t1.sync_from(t)
+        assert t1.get('a') == 1
+        assert t1.get('b') == 2
+        assert t1.get('c') is h1
+        assert t1.get('d').get('x') == 3
+        assert t1.get('d').get('y') == 4

@@ -4,5 +4,5 @@
 ctypedef unsigned char boolean
 ctypedef unsigned int uint
 
-cpdef public inline object raw(object obj)
-cpdef public inline object unraw(object obj)
+cpdef public object raw(object obj)
+cpdef public object unraw(object obj)
